@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang='en' ng-app="productsApp">
+<head>
+	<title>Products</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+	<script type="text/javascript">
+		var productsAppModule = angular.module('productsApp', []);
+
+        productsAppModule.factory('productsFactory', function(){
+        	var products = [];
+        	var factory = {};
+        	
+        	factory.getProducts = function(callback){
+        		callback(products);
+        		//console.log('in factory');
+        		//console.log(products);
+        	}
+        	factory.createProduct = function(product){
+        		products.push(product);
+        	}
+        	factory.removeProduct = function($index){
+        		products.splice($index, 1);
+        	}
+        	factory.purchaseProduct = function(product){
+        		for(item in products){
+        			if(products[item].name == product.name){
+        				products[item].quantity -= 1;
+        			};
+        		};
+        	};
+        	return factory;
+        });
+
+		productsAppModule.controller('productsController', function($scope, productsFactory){
+			$scope.products = [];
+			productsFactory.getProducts(function(data){
+				$scope.products = data
+				//console.log('in controller');
+				//console.log(data);
+			});
+				//make sure that you are using the same syntax consistently!
+				//controller syntax and $scope syntax do not mix!
+			$scope.addProduct = function(data){
+				//console.log($scope.newProduct);
+				productsFactory.createProduct($scope.newProduct);
+				$scope.newProduct = {};
+			};
+
+			$scope.deleteProduct = function(data){
+				productsFactory.removeProduct($scope.deleteProduct);
+			};
+		});
+
+		productsAppModule.controller('ordersController', function($scope, productsFactory){
+			$scope.products = [];
+			productsFactory.getProducts(function(data){
+				$scope.products = data;
+			});
+
+			$scope.buyProduct = function(product){
+				productsFactory.purchaseProduct(product);
+			};
+		});
+
+	</script>
+</head>
+<body>
+	<div class="container">
+
+		<div ng-controller="productsController">
+			<h2>Add a Product:</h2>
+			<form class="form-horizontal" role="form">
+			  <div class="form-group">
+			    <label class="control-label col-sm-2" for="name">Name:</label>
+			    <div class="col-sm-10">
+			      <input type="text" ng-model="newProduct.name">
+			    </div>
+			  </div>
+			  <div class="form-group">
+			    <label class="control-label col-sm-2" for="price">Price:</label>
+			    <div class="col-sm-10">
+			      <input type="text" ng-model="newProduct.price">
+			    </div>
+			  </div>
+
+			  <input type="hidden" ng-model="newProduct.quantity" ng-value="newProduct.quantity = 50">
+
+			  <div class="form-group">
+			    <div class="col-sm-offset-2 col-sm-10">
+			      <button type="submit" class="btn btn-default" ng-click="addProduct()">Add Product</button>
+			    </div>
+			  </div>
+			</form>
+			<table class="table table-striped">
+			    <thead>
+			      <tr>
+			        <th>Name</th>
+			        <th>Price</th>
+			        <th>Actions</th>
+			      </tr>
+			    </thead>
+			    <tbody>
+			      <tr ng-repeat="product in products">
+			        <td>{{ product.name }}</td>
+			        <td>{{ product.price }}</td>
+			        <td><button type="submit" class="btn btn-danger btn-sm" ng-click="deleteProduct($index)">Delete Product</button></td>
+			      </tr>
+			    </tbody>
+			 </table>
+		</div>
+		<hr>
+		<div ng-controller="ordersController">
+			<h2>Orders</h2>
+			<table class="table table-striped">
+			    <thead>
+			      <tr>
+			        <th>Name</th>
+			        <th>Price</th>
+			        <th>Quantity</th>
+			        <th>Actions</th>
+			      </tr>
+			    </thead>
+			    <tbody>
+			      <tr ng-repeat="product in products">
+			        <td> {{ product.name }} </td>
+			        <td> {{ product.price }} </td>
+			        <td> {{ product.quantity }} </td>
+			        <td><button type="submit" class="btn btn-success btn-sm" ng-click="buyProduct(product)">Buy Product</button></td>
+			      </tr>
+			    </tbody>
+			 </table>
+		</div>
+
+</div>
+</body>
+</html>
